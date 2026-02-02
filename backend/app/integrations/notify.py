@@ -14,6 +14,53 @@ from app.models.work import Task, TaskComment
 logger = logging.getLogger("app.notify")
 
 
+def ensure_employee_provisioned(session: Session, employee_id: int) -> None:
+    """Best-effort provisioning of a reviewer/manager so notifications can be delivered."""
+
+    emp = session.get(Employee, employee_id)
+    if emp is None:
+        return
+    if not getattr(emp, "notify_enabled", True):
+        return
+    if getattr(emp, "openclaw_session_key", None):
+        return
+
+    client = OpenClawClient.from_env()
+    if client is None:
+        logger.warning(
+            "ensure_employee_provisioned: missing OpenClaw env", extra={"employee_id": employee_id}
+        )
+        return
+
+    # Deterministic minimal prompt; agents already have detailed guidance in their own provisioning prompt.
+    prompt = (
+        f"You are {emp.name} (employee_id={emp.id}).\n"
+        "You are a reviewer/manager in Mission Control.\n"
+        "When you get a review request, open Mission Control and approve or request changes.\n"
+    )
+
+    try:
+        res = client.tools_invoke(
+            "sessions_spawn",
+            {"task": prompt, "label": f"employee:{emp.id}:{emp.name}"},
+            timeout_s=20.0,
+        )
+        # Extract childSessionKey
+        details = (res.get("result") or {}).get("details") or {}
+        sk = details.get("childSessionKey") or details.get("sessionKey")
+        if sk:
+            emp.openclaw_session_key = sk
+            session.add(emp)
+            session.commit()
+            logger.info(
+                "ensure_employee_provisioned: provisioned",
+                extra={"employee_id": emp.id, "session_key": sk},
+            )
+    except Exception:
+        session.rollback()
+        logger.exception("ensure_employee_provisioned: failed", extra={"employee_id": employee_id})
+
+
 @dataclass(frozen=True)
 class NotifyContext:
     event: str  # task.created | task.updated | task.assigned | comment.created | status.changed
@@ -167,6 +214,14 @@ def notify_openclaw(session: Session, ctx: NotifyContext) -> None:
         return
 
     recipient_ids = resolve_recipients(session, ctx)
+    # If the event requires notifying the reviewer, ensure they are provisioned so the notification is deliverable.
+    if ctx.event == "status.changed":
+        new_status = (getattr(ctx.task, "status", None) or "").lower()
+        if new_status in {"review", "ready_for_review"} and getattr(
+            ctx.task, "reviewer_employee_id", None
+        ):
+            ensure_employee_provisioned(session, int(ctx.task.reviewer_employee_id))
+
     logger.info(
         "notify_openclaw: recipients resolved", extra={"recipient_ids": sorted(recipient_ids)}
     )
