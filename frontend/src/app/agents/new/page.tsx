@@ -9,19 +9,15 @@ import { DashboardSidebar } from "@/components/organisms/DashboardSidebar";
 import { DashboardShell } from "@/components/templates/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import SearchableSelect, {
+  type SearchableSelectOption,
+} from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
 import { getApiBaseUrl } from "@/lib/api-base";
 import {
   DEFAULT_IDENTITY_TEMPLATE,
   DEFAULT_SOUL_TEMPLATE,
 } from "@/lib/agent-templates";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const apiBase = getApiBaseUrl();
 
@@ -35,6 +31,17 @@ type Board = {
   name: string;
   slug: string;
 };
+
+const HEARTBEAT_TARGET_OPTIONS: SearchableSelectOption[] = [
+  { value: "none", label: "None (no outbound message)" },
+  { value: "last", label: "Last channel" },
+];
+
+const getBoardOptions = (boards: Board[]): SearchableSelectOption[] =>
+  boards.map((board) => ({
+    value: board.id,
+    label: board.name,
+  }));
 
 export default function NewAgentPage() {
   const router = useRouter();
@@ -177,22 +184,19 @@ export default function NewAgentPage() {
                     <label className="text-sm font-medium text-slate-900">
                       Board <span className="text-red-500">*</span>
                     </label>
-                    <Select
+                    <SearchableSelect
+                      ariaLabel="Select board"
                       value={boardId}
-                      onValueChange={(value) => setBoardId(value)}
+                      onValueChange={setBoardId}
+                      options={getBoardOptions(boards)}
+                      placeholder="Select board"
+                      searchPlaceholder="Search boards..."
+                      emptyMessage="No matching boards."
+                      triggerClassName="w-full h-11 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      contentClassName="rounded-xl border border-slate-200 shadow-lg"
+                      itemClassName="px-4 py-3 text-sm text-slate-700 data-[selected=true]:bg-slate-50 data-[selected=true]:text-slate-900"
                       disabled={boards.length === 0}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select board" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {boards.map((board) => (
-                          <SelectItem key={board.id} value={board.id}>
-                            {board.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                     {boards.length === 0 ? (
                       <p className="text-xs text-slate-500">
                         Create a board before adding agents.
@@ -206,7 +210,7 @@ export default function NewAgentPage() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Agent persona
                 </p>
-                <div className="mt-4 space-y-4">
+                <div className="mt-4 grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-900">
                       Identity template
@@ -217,6 +221,10 @@ export default function NewAgentPage() {
                       rows={8}
                       disabled={isLoading}
                     />
+                    <p className="text-xs text-slate-500">
+                      Keep the agent_name and agent_id variables unchanged so
+                      the gateway can render them correctly.
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-900">
@@ -255,21 +263,19 @@ export default function NewAgentPage() {
                     <label className="text-sm font-medium text-slate-900">
                       Target
                     </label>
-                    <Select
+                    <SearchableSelect
+                      ariaLabel="Select heartbeat target"
                       value={heartbeatTarget}
-                      onValueChange={(value) => setHeartbeatTarget(value)}
+                      onValueChange={setHeartbeatTarget}
+                      options={HEARTBEAT_TARGET_OPTIONS}
+                      placeholder="Select target"
+                      searchPlaceholder="Search targets..."
+                      emptyMessage="No matching targets."
+                      triggerClassName="w-full h-11 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      contentClassName="rounded-xl border border-slate-200 shadow-lg"
+                      itemClassName="px-4 py-3 text-sm text-slate-700 data-[selected=true]:bg-slate-50 data-[selected=true]:text-slate-900"
                       disabled={isLoading}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select target" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">
-                          None (no outbound message)
-                        </SelectItem>
-                        <SelectItem value="last">Last channel</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
                 </div>
               </div>
