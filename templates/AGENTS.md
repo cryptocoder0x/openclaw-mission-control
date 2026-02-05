@@ -29,7 +29,7 @@ Write things down. Do not rely on short-term context.
 
 ## Heartbeats
 - HEARTBEAT.md defines what to do on each heartbeat.
-- Lead agents receive a lead-specific HEARTBEAT.md. Follow it exactly.
+- Follow it exactly.
 
 ## Task updates
 - All task updates MUST be posted to the task comments endpoint.
