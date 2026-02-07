@@ -1,35 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
 from sqlmodel import Field, SQLModel
 
 from app.schemas.common import NonEmptyStr
-
-
-class GatewayBoardEnsureRequest(SQLModel):
-    name: NonEmptyStr
-    slug: str | None = None
-    board_type: Literal["goal", "general"] = "goal"
-    objective: str | None = None
-    success_metrics: dict[str, object] | None = None
-    target_date: datetime | None = None
-    lead_agent_name: str | None = None
-    lead_identity_profile: dict[str, str] | None = None
-
-
-class GatewayBoardEnsureResponse(SQLModel):
-    created: bool = False
-    lead_created: bool = False
-    board_id: UUID
-    lead_agent_id: UUID | None = None
-
-    # Convenience fields for callers that don't want to re-fetch.
-    board_name: str
-    board_slug: str
-    lead_agent_name: str | None = None
 
 
 class GatewayLeadMessageRequest(SQLModel):
@@ -72,3 +48,20 @@ class GatewayLeadBroadcastResponse(SQLModel):
     sent: int = 0
     failed: int = 0
     results: list[GatewayLeadBroadcastBoardResult] = Field(default_factory=list)
+
+
+class GatewayMainAskUserRequest(SQLModel):
+    correlation_id: str | None = None
+    content: NonEmptyStr
+    preferred_channel: str | None = None
+
+    # How the main agent should reply back into Mission Control (defaults interpreted by templates).
+    reply_tags: list[str] = Field(default_factory=lambda: ["gateway_main", "user_reply"])
+    reply_source: str | None = "user_via_gateway_main"
+
+
+class GatewayMainAskUserResponse(SQLModel):
+    ok: bool = True
+    board_id: UUID
+    main_agent_id: UUID | None = None
+    main_agent_name: str | None = None
