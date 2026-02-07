@@ -21,14 +21,12 @@ describe("/activity feed", () => {
     cy.contains(/sign in to view the feed/i).should("be.visible");
     cy.get('[data-testid="activity-signin"]').click();
 
-    // Redirect mode should bring us to a full-page Clerk sign-in experience.
     cy.get('input[type="email"], input[name="identifier"]', { timeout: 20_000 })
       .first()
       .should("be.visible")
       .clear()
       .type("jane+clerk_test@example.com");
 
-<<<<<<< HEAD
     cy.contains('button', /continue|sign in/i).click();
 
     cy.get('input', { timeout: 20_000 })
@@ -39,33 +37,15 @@ describe("/activity feed", () => {
 
     cy.contains('button', /verify|continue|sign in/i).click();
 
-    // Back to app
     cy.contains(/live feed/i, { timeout: 30_000 }).should("be.visible");
-=======
-    // OTP / verification code
-    cy.contains(/verification code|code/i).should("be.visible");
-    cy
-      .get('input')
-      .filter('[inputmode="numeric"], [autocomplete="one-time-code"], [type="tel"], [type="text"]')
-      .first()
-      .type("424242");
-
-    cy.contains('button', /verify|continue|sign in/i).click();
-    cy.contains(/live feed/i).should('be.visible');
->>>>>>> 446cfb2 (E2E: remove Clerk bypass and sign in via Clerk in Cypress)
   }
 
-<<<<<<< HEAD
-=======
-  
->>>>>>> a6188f5 (test(e2e): add negative auth case (wrong OTP))
   it("auth negative: wrong OTP shows an error", () => {
     cy.visit("/activity");
 
     cy.contains(/sign in to view the feed/i).should("be.visible");
     cy.get('[data-testid="activity-signin"]').click();
 
-<<<<<<< HEAD
     cy.get('input[type="email"], input[name="identifier"]', { timeout: 20_000 })
       .first()
       .should("be.visible")
@@ -83,23 +63,6 @@ describe("/activity feed", () => {
     cy.contains('button', /verify|continue|sign in/i).click();
 
     cy.contains(/invalid|incorrect|try again/i, { timeout: 20_000 }).should("be.visible");
-=======
-    cy.contains(/email address/i).should("be.visible");
-    cy.get('input[type="email"]').clear().type("jane+clerk_test@example.com");
-    cy.contains(/continue|sign in/i).click();
-
-    cy.contains(/verification code|code/i).should("be.visible");
-    // Wrong code
-    cy.get('input')
-      .filter('[inputmode="numeric"], [autocomplete="one-time-code"], [type="tel"], [type="text"]')
-      .first()
-      .type("000000");
-
-    cy.contains('button', /verify|continue|sign in/i).click();
-
-    // Clerk should display an error message.
-    cy.contains(/invalid|incorrect|try again/i).should("be.visible");
->>>>>>> a6188f5 (test(e2e): add negative auth case (wrong OTP))
   });
 
   it("happy path: renders task comment cards", () => {
