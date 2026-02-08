@@ -14,6 +14,7 @@ from app.core.time import utcnow
 from app.db import crud
 from app.db.pagination import paginate
 from app.db.session import get_session
+from app.integrations.openclaw_gateway import OpenClawGatewayError
 from app.models.agents import Agent
 from app.models.board_group_memory import BoardGroupMemory
 from app.models.board_groups import BoardGroup
@@ -240,7 +241,7 @@ async def apply_board_group_heartbeat(
             continue
         try:
             await sync_gateway_agent_heartbeats(gateway, gateway_agents)
-        except Exception:
+        except OpenClawGatewayError:
             failed_agent_ids.extend([agent.id for agent in gateway_agents])
 
     return BoardGroupHeartbeatApplyResult(

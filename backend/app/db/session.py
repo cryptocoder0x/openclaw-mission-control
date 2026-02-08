@@ -71,14 +71,13 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         try:
             yield session
         finally:
+            in_txn = False
             try:
                 in_txn = bool(session.in_transaction())
             except SQLAlchemyError:
                 logger.exception("Failed to inspect session transaction state.")
-                return
-            if not in_txn:
-                return
-            try:
-                await session.rollback()
-            except SQLAlchemyError:
-                logger.exception("Failed to rollback session after request error.")
+            if in_txn:
+                try:
+                    await session.rollback()
+                except SQLAlchemyError:
+                    logger.exception("Failed to rollback session after request error.")

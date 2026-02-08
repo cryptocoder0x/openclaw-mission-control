@@ -845,7 +845,7 @@ async def broadcast_gateway_lead_message(
                 )
             )
             sent += 1
-        except Exception as exc:
+        except (HTTPException, OpenClawGatewayError, ValueError) as exc:
             results.append(
                 GatewayLeadBroadcastBoardResult(
                     board_id=board.id,

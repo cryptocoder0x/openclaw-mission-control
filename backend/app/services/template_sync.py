@@ -93,7 +93,7 @@ class _GatewayBackoff:
                 value = await fn()
                 self.reset()
                 return value
-            except Exception as exc:
+            except OpenClawGatewayError as exc:
                 if not _is_transient_gateway_error(exc):
                     raise
                 now = asyncio.get_running_loop().time()
@@ -430,13 +430,20 @@ async def sync_gateway_templates(
                 )
 
         try:
+            agent_item: Agent = agent
+            board_item: Board = board
+            auth_token_value: str = auth_token
 
-            async def _do_provision() -> None:
+            async def _do_provision(
+                agent_item: Agent = agent_item,
+                board_item: Board = board_item,
+                auth_token_value: str = auth_token_value,
+            ) -> None:
                 await provision_agent(
-                    agent,
-                    board,
+                    agent_item,
+                    board_item,
                     gateway,
-                    auth_token,
+                    auth_token_value,
                     user,
                     action="update",
                     force_bootstrap=force_bootstrap,
@@ -456,7 +463,7 @@ async def sync_gateway_templates(
                 )
             )
             return result
-        except Exception as exc:  # pragma: no cover - gateway/network dependent
+        except (OSError, RuntimeError, ValueError) as exc:  # pragma: no cover
             result.agents_skipped += 1
             result.errors.append(
                 GatewayTemplatesSyncError(
@@ -584,7 +591,7 @@ async def sync_gateway_templates(
                 )
             )
             return result
-        except Exception as exc:  # pragma: no cover - gateway/network dependent
+        except (OSError, RuntimeError, ValueError) as exc:  # pragma: no cover
             result.errors.append(
                 GatewayTemplatesSyncError(
                     agent_id=main_agent.id,
