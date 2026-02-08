@@ -34,6 +34,11 @@ OpenClaw Mission Control is under active development. Expect breaking changes an
 ```bash
 cp .env.example .env
 
+# REQUIRED: ensure the browser can reach the backend API.
+# NEXT_PUBLIC_API_URL must be reachable from the *browser* (host), not an internal Docker network name.
+# If you change ports/hosts, update NEXT_PUBLIC_API_URL in .env accordingly.
+# (Missing/blank NEXT_PUBLIC_API_URL will break frontend API calls like Activity feed.)
+
 # IMPORTANT: if you are not configuring Clerk, disable it by ensuring
 # NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is NOT set.
 # (The default `frontend/.env.example` contains placeholders that you should delete/blank.)
@@ -112,14 +117,21 @@ Notes:
 ```bash
 cd frontend
 
-# Configure API URL (and optionally disable Clerk for local dev by removing/blanking Clerk env vars)
+# Configure API URL (REQUIRED) and optionally disable Clerk for local dev by removing/blanking Clerk env vars
 cp .env.example .env.local
+
+# If you run the backend locally on :8000, this should be:
+# NEXT_PUBLIC_API_URL=http://localhost:8000
 
 npm install
 npm run dev
 ```
 
 Open http://localhost:3000.
+
+### Cypress E2E (local)
+
+When running Cypress (`cd frontend && npm run e2e`), make sure `NEXT_PUBLIC_API_URL` is set (either in `frontend/.env.local` or your shell env). In CI we run the frontend on `http://localhost:3000`, so `NEXT_PUBLIC_API_URL` is set to `http://localhost:3000` for the E2E job.
 
 ## Key concepts / high-level architecture
 
@@ -150,6 +162,8 @@ make check
 ```
 
 ## Troubleshooting
+
+More: [`docs/troubleshooting/README.md`](./docs/troubleshooting/README.md)
 
 ### Frontend keeps redirecting / Clerk errors
 
