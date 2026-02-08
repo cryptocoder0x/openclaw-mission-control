@@ -271,7 +271,7 @@ async def delete_board_group(
     session: AsyncSession = Depends(get_session),
     ctx=Depends(require_org_admin),
 ) -> OkResponse:
-    group = await _require_group_access(session, group_id=group_id, member=ctx.member, write=True)
+    await _require_group_access(session, group_id=group_id, member=ctx.member, write=True)
 
     # Boards reference groups, so clear the FK first to keep deletes simple.
     await session.execute(
