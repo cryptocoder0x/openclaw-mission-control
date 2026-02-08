@@ -9,6 +9,7 @@ from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.boards import Board
+from app.models.organizations import Organization
 from app.models.task_dependencies import TaskDependency
 from app.models.tasks import Task
 from app.services import task_dependencies as td
@@ -29,7 +30,9 @@ async def _make_session(engine: AsyncEngine) -> AsyncSession:
 async def _seed_board_and_tasks(
     session: AsyncSession, *, board_id: UUID, task_ids: list[UUID]
 ) -> None:
-    session.add(Board(id=board_id, name="b", slug="b"))
+    org_id = uuid4()
+    session.add(Organization(id=org_id, name=f"org-{org_id}"))
+    session.add(Board(id=board_id, organization_id=org_id, name="b", slug="b"))
     for tid in task_ids:
         session.add(Task(id=tid, board_id=board_id, title=f"t-{tid}", description=None))
     await session.commit()
