@@ -4,6 +4,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { isLikelyValidClerkPublishableKey } from "@/auth/clerkKey";
 
 const isClerkEnabled = () =>
+  process.env.NEXT_PUBLIC_AUTH_MODE !== "local" &&
   isLikelyValidClerkPublishableKey(
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
   );

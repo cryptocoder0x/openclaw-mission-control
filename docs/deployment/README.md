@@ -110,49 +110,58 @@ Instead, it supports an optional user-managed env file:
 
 If present, Compose will load it.
 
-## Clerk (auth) notes
+## Authentication modes
 
-Clerk is currently required.
+Mission Control supports two deployment auth modes:
 
-### Frontend (Clerk keys)
+- `AUTH_MODE=local`: shared bearer token auth (self-host default)
+- `AUTH_MODE=clerk`: Clerk JWT auth
 
-Create `frontend/.env` (this file is **not** committed; `compose.yml` loads it if present):
+### Local mode (self-host default)
+
+Set in `.env` (repo root):
 
 ```env
-# Frontend → Backend
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# Frontend → Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
-CLERK_SECRET_KEY=YOUR_SECRET_KEY
-
-# Optional (but recommended) redirects
-NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/boards
-NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/boards
-NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/boards
-NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/boards
+AUTH_MODE=local
+LOCAL_AUTH_TOKEN=replace-with-strong-random-token
 ```
 
-### Backend (auth)
+Set frontend mode (optional override in `frontend/.env`):
 
-The backend authenticates requests using the Clerk SDK and **`CLERK_SECRET_KEY`** (see `backend/app/core/auth.py`).
+```env
+NEXT_PUBLIC_AUTH_MODE=local
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-Create `backend/.env` (this file is **not** committed) with at least:
+Users enter `LOCAL_AUTH_TOKEN` in the local login screen.
+
+### Clerk mode
+
+Set in `.env` (repo root):
+
+```env
+AUTH_MODE=clerk
+```
+
+Create `backend/.env` with at least:
 
 ```env
 CLERK_SECRET_KEY=sk_test_your_real_key
-
-# Optional tuning
 CLERK_API_URL=https://api.clerk.com
 CLERK_VERIFY_IAT=true
 CLERK_LEEWAY=10.0
 ```
 
-Then either:
-1) update `compose.yml` to load `backend/.env` (recommended), or
-2) pass the values via `services.backend.environment`.
+Create `frontend/.env` with at least:
 
-**Security:** treat `CLERK_SECRET_KEY` like a password. Do not commit it.
+```env
+NEXT_PUBLIC_AUTH_MODE=clerk
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_real_key
+CLERK_SECRET_KEY=sk_test_your_real_key
+```
+
+**Security:** treat `LOCAL_AUTH_TOKEN` and `CLERK_SECRET_KEY` like passwords. Do not commit them.
 
 ## Troubleshooting
 
