@@ -19,10 +19,10 @@ describe("/activity feed", () => {
     cy.contains(/live feed/i).should("be.visible");
   }
 
-  it("auth negative: signed-out user is prompted to sign in", () => {
+  it("auth negative: signed-out user is redirected to sign-in", () => {
+    // SignedOutPanel runs in redirect mode on this page.
     cy.visit("/activity");
-    cy.contains(/sign in to view the feed/i).should("be.visible");
-    cy.get('[data-testid="activity-signin"]').should("be.visible");
+    cy.location("pathname", { timeout: 20_000 }).should("match", /\/sign-in/);
   });
 
   it("happy path: renders feed items from the activity endpoint", () => {
