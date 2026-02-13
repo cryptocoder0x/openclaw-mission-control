@@ -45,6 +45,21 @@ Core operational areas:
 
 ## Get started in minutes
 
+### Option A: One-command production-style bootstrap
+
+```bash
+./install.sh
+```
+
+The installer is interactive and will:
+
+- Ask for deployment mode (`docker` or `local`).
+- Install missing system dependencies when possible.
+- Generate and configure environment files.
+- Bootstrap and start the selected deployment mode.
+
+### Option B: Manual setup
+
 ### Prerequisites
 
 - Docker Engine
