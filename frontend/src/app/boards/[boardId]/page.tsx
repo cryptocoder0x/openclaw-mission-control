@@ -3112,17 +3112,6 @@ export default function BoardDetailPage() {
                     <Activity className="h-4 w-4" />
                   </Button>
                   {isOrgAdmin ? (
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push("/custom-fields")}
-                      className="h-9 px-3"
-                      aria-label="Board custom fields"
-                      title="Manage custom fields"
-                    >
-                      Fields
-                    </Button>
-                  ) : null}
-                  {isOrgAdmin ? (
                     <button
                       type="button"
                       onClick={() => router.push(`/boards/${boardId}/edit`)}
