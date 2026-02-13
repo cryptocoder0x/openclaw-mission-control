@@ -2217,7 +2217,9 @@ export default function BoardDetailPage() {
 
   const selectedTaskDependencies = useMemo<DependencyBannerDependency[]>(() => {
     if (!selectedTask) return [];
-    const blockedDependencyIds = new Set(selectedTask.blocked_by_task_ids ?? []);
+    const blockedDependencyIds = new Set(
+      selectedTask.blocked_by_task_ids ?? [],
+    );
     return (selectedTask.depends_on_task_ids ?? []).map((dependencyId) => {
       const dependencyTask = taskById.get(dependencyId);
       const statusLabel = dependencyTask?.status
@@ -2246,7 +2248,9 @@ export default function BoardDetailPage() {
     return tasks
       .filter((task) => task.depends_on_task_ids?.includes(selectedTask.id))
       .map((task) => {
-        const statusLabel = task.status ? task.status.replace(/_/g, " ") : "unknown";
+        const statusLabel = task.status
+          ? task.status.replace(/_/g, " ")
+          : "unknown";
         return {
           id: task.id,
           title: task.title,
@@ -3469,7 +3473,7 @@ export default function BoardDetailPage() {
                   </DependencyBanner>
                 );
               })()}
-              </div>
+            </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
