@@ -105,8 +105,9 @@ backend-migrate: ## Apply backend DB migrations (uses backend/migrations)
 	cd $(BACKEND_DIR) && uv run alembic upgrade head
 
 .PHONY: backend-migration-check
-backend-migration-check: ## Validate Alembic migrations on clean Postgres (upgrade head + single-head sanity)
+backend-migration-check: ## Validate migration graph + reversible path on clean Postgres
 	@set -euo pipefail; \
+	(cd $(BACKEND_DIR) && uv run python scripts/check_migration_graph.py); \
 	CONTAINER_NAME="mc-migration-check-$$RANDOM"; \
 	docker run -d --rm --name $$CONTAINER_NAME -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=migration_ci -p 55432:5432 postgres:16 >/dev/null; \
 	cleanup() { docker rm -f $$CONTAINER_NAME >/dev/null 2>&1 || true; }; \
@@ -124,7 +125,11 @@ backend-migration-check: ## Validate Alembic migrations on clean Postgres (upgra
 		AUTH_MODE=local \
 		LOCAL_AUTH_TOKEN=ci-local-token-ci-local-token-ci-local-token-ci-local-token \
 		DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:55432/migration_ci \
-		uv run alembic heads | grep -q "(head)"
+		uv run alembic downgrade base && \
+		AUTH_MODE=local \
+		LOCAL_AUTH_TOKEN=ci-local-token-ci-local-token-ci-local-token-ci-local-token \
+		DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:55432/migration_ci \
+		uv run alembic upgrade head
 
 .PHONY: build
 build: frontend-build ## Build artifacts
