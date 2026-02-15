@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     # RQ queueing / dispatch
     rq_redis_url: str = "redis://localhost:6379/0"
     rq_queue_name: str = "default"
-    rq_dispatch_throttle_seconds: float = 2.0
+    rq_dispatch_throttle_seconds: float = 15.0
     rq_dispatch_max_retries: int = 3
     rq_dispatch_retry_base_seconds: float = 10.0
     rq_dispatch_retry_max_seconds: float = 120.0
