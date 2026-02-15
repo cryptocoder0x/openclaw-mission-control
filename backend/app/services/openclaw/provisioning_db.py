@@ -31,6 +31,7 @@ from app.models.activity_events import ActivityEvent
 from app.models.agents import Agent
 from app.models.approvals import Approval
 from app.models.board_memory import BoardMemory
+from app.models.board_webhooks import BoardWebhook
 from app.models.boards import Board
 from app.models.gateways import Gateway
 from app.models.organizations import Organization
@@ -1847,6 +1848,14 @@ class AgentLifecycleService(OpenClawDBService):
             Approval,
             col(Approval.agent_id) == agent.id,
             agent_id=None,
+            commit=False,
+        )
+        await crud.update_where(
+            self.session,
+            BoardWebhook,
+            col(BoardWebhook.agent_id) == agent.id,
+            agent_id=None,
+            updated_at=now,
             commit=False,
         )
         await self.session.delete(agent)
